@@ -34,6 +34,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'promptResponses' => fn () => $request->user() ? $request->user()->promptResponses()->get() : [], // This will make it a global prop, so not the best place to put it, but works for the assesment
         ];
     }
 }

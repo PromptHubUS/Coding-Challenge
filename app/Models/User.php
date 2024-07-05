@@ -44,4 +44,9 @@ class User extends Authenticatable
             'password'          => 'hashed',
         ];
     }
+
+    public function promptResponses()
+    {
+        return $this->hasMany(PromptResponse::class)->orderBy('created_at', 'desc');
+    }
 }
