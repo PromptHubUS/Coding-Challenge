@@ -1,5 +1,7 @@
 # PromptHub Coding Challenge
 
+<img alt="PromptHub Logo" src="https://prompthub-assets.nyc3.cdn.digitaloceanspaces.com/prompthub-logo.png" style="height: 50px; width: auto;" />
+
 
 ## Summary
 
