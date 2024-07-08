@@ -8,6 +8,7 @@ use Inertia\Response;
 use App\Services\LLMService;
 use Illuminate\Support\Facades\Log;
 use App\Models\AiModel;
+use App\Http\Requests\ProcessPromptRequest;
 
 use App\Models\PromptResponse;
 
@@ -26,13 +27,8 @@ class PromptController extends Controller {
         ]);
     }
 
-    public function process(Request $request) {
-        $validated = $request->validate([
-            'model_id' => 'required|exists:ai_models,id',
-            'prompt' => 'required|string',
-            'modifier' => 'required|string',
-        ]);
-
+    public function process(ProcessPromptRequest $request) {
+        $validated = $request->validated();
         $model = AiModel::find($validated['model_id']);
         $prompt = $validated['prompt'];
         $modifier = $validated['modifier'];
