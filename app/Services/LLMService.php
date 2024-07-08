@@ -11,16 +11,16 @@ class LLMService {
         $this->client = $client;
     }
 
-    public function processInput($prompt, $modifier) {
+    public function processInput($model, $prompt, $modifier) {
         if (empty($prompt) || empty($modifier)) {
             throw new \InvalidArgumentException('Prompt and modifier must be provided and cannot be empty.');
         }
 
-        $promptResponse = $this->processPrompt($prompt);
+        $promptResponse = $this->processPrompt($model, $prompt);
 
         $intermediateResult = $promptResponse['choices'][0]['message']['content'] ?? '';
 
-        $modifierResponse = $this->processPrompt($modifier . ' ' . $intermediateResult);
+        $modifierResponse = $this->processPrompt($model, $modifier . ' ' . $intermediateResult);
 
         $finalResult = $modifierResponse['choices'][0]['message']['content'] ?? '';
 
@@ -30,9 +30,9 @@ class LLMService {
         ];
     }
 
-    private function processPrompt($prompt) {
+    private function processPrompt($model, $prompt) {
         return $this->client->chat()->create([
-            'model' => 'gpt-3.5-turbo',
+            'model' => $model,
             'messages' => [
                 ['role' => 'user', 'content' => $prompt],
             ],

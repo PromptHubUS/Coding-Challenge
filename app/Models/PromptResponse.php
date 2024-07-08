@@ -8,6 +8,7 @@ class PromptResponse extends Model
 {
     protected $fillable = [
         'user_id',
+        'model_id',
         'prompt',
         'modifier',
         'intermediate_result',
@@ -20,5 +21,10 @@ class PromptResponse extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function model()
+    {
+        return $this->belongsTo(AiModel::class);
     }
 }

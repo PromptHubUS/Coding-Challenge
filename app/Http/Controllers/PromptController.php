@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Services\LLMService;
 use Inertia\Inertia;
+use Inertia\Response;
+use App\Services\LLMService;
 use Illuminate\Support\Facades\Log;
+use App\Models\AiModel;
 
 use App\Models\PromptResponse;
 
@@ -16,22 +18,33 @@ class PromptController extends Controller {
         $this->llmService = $llmService;
     }
 
+    public function showForm(Request $request): Response {
+        $models = AiModel::all();
+        return Inertia::render('Dashboard', [
+            'models' => $models,
+            'promptResponses' => $request->user()->promptResponses()->with('model')->get(),
+        ]);
+    }
+
     public function process(Request $request) {
         $validated = $request->validate([
+            'model_id' => 'required|exists:ai_models,id',
             'prompt' => 'required|string',
             'modifier' => 'required|string',
         ]);
 
+        $model = AiModel::find($validated['model_id']);
         $prompt = $validated['prompt'];
         $modifier = $validated['modifier'];
 
         Log::info('Processing input:', ['prompt' => $prompt, 'modifier' => $modifier]);
 
         try {
-            $response = $this->llmService->processInput($prompt, $modifier);
+            $response = $this->llmService->processInput($model->name, $prompt, $modifier);
 
             PromptResponse::create([
                 'user_id' => $request->user()->id,
+                'model_id' => $model->id,
                 'prompt' => $prompt,
                 'modifier' => $modifier,
                 'intermediate_result' => $response['intermediate_result'],
@@ -42,8 +55,8 @@ class PromptController extends Controller {
 
         } catch (\Exception $e) {
             Log::error('Error processing input:', ['error' => $e->getMessage()]);
-             // The Dashboard cant actually handle the error right now, but would be nice to have
-           return redirect()->route('dashboard', ['error' => 'An error occurred while processing the input.']);
+            // The Dashboard cant actually handle the error right now, but would be nice to have
+            return redirect()->route('dashboard')->withErrors('error', 'An error occurred while processing the input.');
         }
     }
 }

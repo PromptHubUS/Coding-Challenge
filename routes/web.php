@@ -16,9 +16,7 @@ Route::get('/', function () {
     ]);
 });
 // This should be /prompt but some other pices uses it as well, and it will make the PR harder to review 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [PromptController::class, 'showForm'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
