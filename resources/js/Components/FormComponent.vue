@@ -54,11 +54,13 @@ const submitForm = () => {
             <button type="submit" class="w-full px-4 py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition">Submit</button>
         </form>
         <transition name="fade">
-            <div v-if="messageType" class="mt-4 flex items-center justify-center">
-                <CheckCircleIcon v-if="messageType === 'success'" class="h-6 w-6 text-green-500 mr-2" />
-                <XCircleIcon v-if="messageType === 'error'" class="h-6 w-6 text-red-500 mr-2" />
-                <p v-if="messageType === 'success'" class="text-green-500">Submission successful!</p>
-                <p v-if="messageType === 'error'" class="text-red-500">There was an error with your submission.</p>
+            <div v-if="messageType === 'success'" class="mt-4 flex items-center justify-center">
+                <CheckCircleIcon class="h-6 w-6 text-green-500 mr-2" />
+                <p class="text-green-500">Submission successful!</p>
+            </div>
+            <div v-else-if="messageType === 'error'" class="mt-4 flex items-center justify-center">
+                <XCircleIcon class="h-6 w-6 text-red-500 mr-2" />
+                <p class="text-red-500">There was an error with your submission.</p>
             </div>
         </transition>
     </div>
