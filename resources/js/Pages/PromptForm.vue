@@ -59,6 +59,7 @@ export default {
                     buffer = lines.pop();
 
                     for (let line of lines) {
+                        console.log('Line:', line);
                         if (line.startsWith('data: ')) {
                             if(line.includes('[DONE]'))
                             {
@@ -67,8 +68,8 @@ export default {
                             }
                             try {
                                 let json = JSON.parse(line.substring(6));
-                                if (json?.choices?.[0]?.delta?.content) {
-                                    this.result += json.choices[0].delta.content;
+                                if (json?.content) {
+                                    this.result = json.content;
                                 }
                             } catch (e) {
                                 console.error('Error parsing JSON:', e);

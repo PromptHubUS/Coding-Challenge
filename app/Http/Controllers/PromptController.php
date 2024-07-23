@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PromptController extends Controller
 {
@@ -24,17 +26,26 @@ class PromptController extends Controller
 
         $question = $request->input('question');
         $modifier = $request->input('modifier');
-
-        // Define the prompt and modifier clearly
         $prompt = "Please answer the following question. After providing your answer, apply the following rule to the response: '$modifier'.\n\nQuestion: $question";
 
-        // Create a Guzzle client
         $client = new Client();
 
-        // Create a streamed response
-        return new StreamedResponse(function () use ($client, $prompt) {
+        // Create a unique ID for the prompt
+
+        // Save the initial prompt details with a placeholder for content
+       DB::table('user_prompts')->insert([
+            'question' => $question,
+            'modifier' => $modifier,
+            'user_id' => auth()->id(),
+            'prompt_output' => '', // Initially empty
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $promptId = DB::getPdo()->lastInsertId();
+
+        return new StreamedResponse(function () use ($client, $prompt, $question, $modifier, $promptId) {
             try {
-                // Send the prompt to ChatGPT using the chat/completions endpoint
                 $response = $client->request('POST', 'https://api.openai.com/v1/chat/completions', [
                     'headers' => [
                         'Authorization' => 'Bearer ' . env('OPENAI_API_KEY'),
@@ -43,10 +54,7 @@ class PromptController extends Controller
                     'json' => [
                         'model' => 'gpt-3.5-turbo',
                         'messages' => [
-                            [
-                                'role' => 'user',
-                                'content' => $prompt,
-                            ]
+                            ['role' => 'user', 'content' => $prompt],
                         ],
                         'max_tokens' => 150,
                         'temperature' => 0.7,
@@ -55,24 +63,46 @@ class PromptController extends Controller
                     'stream' => true,
                 ]);
 
-                // Capture the response body
                 $body = $response->getBody();
+                $currentAnswer = '';
+                $buffer = '';
 
-                // Output the response in chunks
+                // Read and process chunks
                 while (!$body->eof()) {
-                    echo $body->read(1024); // Read and output 1024 bytes at a time
-                    ob_flush(); // Flush the output buffer
-                    flush();    // Flush the system output buffer
+                    $chunk = $body->read(1024); // Read 1024 bytes at a time
+                    $buffer .= $chunk;
+
+                    // Process buffer and split by lines
+                    $lines = explode("\n", $buffer);
+                    $buffer = array_pop($lines); // Keep last incomplete line
+
+                    foreach ($lines as $line) {
+                        if (strpos($line, 'data: ') === 0) {
+                            $json = json_decode(substr($line, 6), true); // Remove 'data: ' and decode JSON
+                            if (isset($json['choices'][0]['delta']['content'])) {
+                                $formattedChunk = $json['choices'][0]['delta']['content'];
+                                $currentAnswer .= $formattedChunk;
+                                echo "data: " . json_encode(['content' => $currentAnswer]) . "\n\n";
+                                ob_flush(); // Flush the output buffer
+                                flush();    // Flush the system output buffer
+                            }
+                        }
+                    }
                 }
+
+                // Update the database with the final content
+                DB::table('user_prompts')
+                    ->where('id', $promptId)
+                    ->update(['prompt_output' => $currentAnswer, 'updated_at' => now()]);
 
             } catch (RequestException $e) {
                 // Handle exception
-                echo json_encode([
-                    'error' => $e->getMessage(),
-                ]);
+                echo "data: " . json_encode(['error' => $e->getMessage()]) . "\n\n";
+                ob_flush(); // Flush the output buffer
+                flush();    // Flush the system output buffer
             }
         }, 200, [
-            'Content-Type' => 'text/plain', // Use text/plain for simple streaming
+            'Content-Type' => 'text/event-stream', // Use text/event-stream for SSE
         ]);
     }
 }
