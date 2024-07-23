@@ -30,14 +30,11 @@ class PromptController extends Controller
 
         $client = new Client();
 
-        // Create a unique ID for the prompt
-
-        // Save the initial prompt details with a placeholder for content
        DB::table('user_prompts')->insert([
             'question' => $question,
             'modifier' => $modifier,
             'user_id' => auth()->id(),
-            'prompt_output' => '', // Initially empty
+            'prompt_output' => '',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -67,42 +64,38 @@ class PromptController extends Controller
                 $currentAnswer = '';
                 $buffer = '';
 
-                // Read and process chunks
                 while (!$body->eof()) {
-                    $chunk = $body->read(1024); // Read 1024 bytes at a time
+                    $chunk = $body->read(1024);
                     $buffer .= $chunk;
 
-                    // Process buffer and split by lines
                     $lines = explode("\n", $buffer);
-                    $buffer = array_pop($lines); // Keep last incomplete line
+                    $buffer = array_pop($lines);
 
                     foreach ($lines as $line) {
                         if (strpos($line, 'data: ') === 0) {
-                            $json = json_decode(substr($line, 6), true); // Remove 'data: ' and decode JSON
+                            $json = json_decode(substr($line, 6), true);
                             if (isset($json['choices'][0]['delta']['content'])) {
                                 $formattedChunk = $json['choices'][0]['delta']['content'];
                                 $currentAnswer .= $formattedChunk;
                                 echo "data: " . json_encode(['content' => $currentAnswer]) . "\n\n";
-                                ob_flush(); // Flush the output buffer
-                                flush();    // Flush the system output buffer
+                                ob_flush();
+                                flush();
                             }
                         }
                     }
                 }
 
-                // Update the database with the final content
                 DB::table('user_prompts')
                     ->where('id', $promptId)
                     ->update(['prompt_output' => $currentAnswer, 'updated_at' => now()]);
 
             } catch (RequestException $e) {
-                // Handle exception
                 echo "data: " . json_encode(['error' => $e->getMessage()]) . "\n\n";
-                ob_flush(); // Flush the output buffer
-                flush();    // Flush the system output buffer
+                ob_flush();
+                flush();
             }
         }, 200, [
-            'Content-Type' => 'text/event-stream', // Use text/event-stream for SSE
+            'Content-Type' => 'text/event-stream',
         ]);
     }
 }

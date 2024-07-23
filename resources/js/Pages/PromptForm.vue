@@ -37,7 +37,7 @@ export default {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                     },
                     body: JSON.stringify({
-                        question: this.question, // Use v-model values
+                        question: this.question,
                         modifier: this.modifier,
                     }),
                 });
