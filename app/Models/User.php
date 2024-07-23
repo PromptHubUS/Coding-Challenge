@@ -44,4 +44,12 @@ class User extends Authenticatable
             'password'          => 'hashed',
         ];
     }
+
+    /**
+     * Get the prompts for the user.
+     */
+    public function prompts()
+    {
+        return $this->hasMany(UserPrompt::class);
+    }
 }
