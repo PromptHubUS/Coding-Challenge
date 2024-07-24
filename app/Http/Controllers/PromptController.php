@@ -98,4 +98,20 @@ class PromptController extends Controller
             'Content-Type' => 'text/event-stream',
         ]);
     }
+
+    /**
+     * Display the last prompt output.
+     *
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function show()
+    {
+        $prompt = DB::table('user_prompts')
+            ->where('user_id', auth()->id())
+            ->orderBy('id', 'desc')
+            ->first();
+
+        return response()->json($prompt);
+    }
 }
