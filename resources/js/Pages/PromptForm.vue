@@ -2,12 +2,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
 </script>
-
-
-Here's a formatted version of your form, using Tailwind CSS for styling to ensure it looks clean and centered:
-
-vue
-Copiar código
 <template>
     <Head title="Prompt" />
     <AuthenticatedLayout>
