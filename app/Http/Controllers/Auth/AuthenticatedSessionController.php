@@ -33,7 +33,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('prompts.store', absolute: false));
+        return redirect()->intended(route('prompts.index', absolute: false));
     }
 
     /**

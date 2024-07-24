@@ -18,7 +18,7 @@ Route::get('/', function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/prompts', function () {
         return Inertia::render('PromptForm');
-    });
+    })->name('prompts.index');
 });
 
 Route::get('/dashboard', function () {
@@ -29,8 +29,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::post('/prompts', [PromptController::class, 'store'])->name('prompts.store');
     Route::get('/prompts/show', [PromptController::class, 'show']);
+    Route::post('/prompts/store', [PromptController::class, 'store'])->name('prompts.store');
 });
 
 require __DIR__ . '/auth.php';

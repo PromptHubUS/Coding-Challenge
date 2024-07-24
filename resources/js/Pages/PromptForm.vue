@@ -51,7 +51,7 @@ export default {
         async submitForm() {
             this.result = '';
             try {
-                const response = await fetch('/prompts', {
+                const response = await fetch('/prompts/store', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
