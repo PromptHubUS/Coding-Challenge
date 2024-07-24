@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PromptController;
 use Illuminate\Foundation\Application;
+use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -15,12 +16,6 @@ Route::get('/', function () {
     ]);
 });
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/prompts', function () {
-        return Inertia::render('PromptForm');
-    })->name('prompts.index');
-});
-
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -31,6 +26,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/prompts/show', [PromptController::class, 'show']);
     Route::post('/prompts/store', [PromptController::class, 'store'])->name('prompts.store');
+    Route::get('/prompts', [PromptController::class, 'index'])->name('prompts.index');
 });
 
 require __DIR__ . '/auth.php';

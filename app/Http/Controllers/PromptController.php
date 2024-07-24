@@ -8,6 +8,7 @@ use GuzzleHttp\Exception\RequestException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class PromptController extends Controller
 {
@@ -113,5 +114,18 @@ class PromptController extends Controller
             ->first();
 
         return response()->json($prompt);
+    }
+
+    /**
+     * Display the last prompt output.
+     *
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index(Request $request)
+    {
+        return Inertia::render('PromptForm', [
+            'csrfToken' => $request->session()->token(),
+        ]);
     }
 }

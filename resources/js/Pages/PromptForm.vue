@@ -34,6 +34,9 @@ import { Head } from '@inertiajs/vue3';
 
 <script>
 export default {
+      props: {
+    csrfToken: String,
+  },
     data() {
         return {
             question: '',
@@ -48,8 +51,8 @@ export default {
                 const response = await fetch('/prompts/store', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': this.csrfToken
                     },
                     body: JSON.stringify({
                         question: this.question,
@@ -74,7 +77,6 @@ export default {
                     buffer = lines.pop();
 
                     for (let line of lines) {
-                        console.log('Line:', line);
                         if (line.startsWith('data: ')) {
                             if(line.includes('[DONE]'))
                             {
