@@ -44,4 +44,24 @@ class User extends Authenticatable
             'password'          => 'hashed',
         ];
     }
+
+    /**
+     * Get the questions for the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function questions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Question::class);
+    }
+
+    /**
+     * Get the modifiers for the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function modifiers(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Modifier::class);
+    }
 }
